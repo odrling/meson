@@ -798,7 +798,13 @@ def detect_vcs(source_dir: T.Union[str, Path]) -> T.Optional[T.Dict[str, str]]:
     parent_paths_and_self.appendleft(source_dir)
     for curdir in parent_paths_and_self:
         for vcs in vcs_systems:
-            if Path.is_dir(curdir.joinpath(vcs['repo_dir'])) and shutil.which(vcs['cmd']):
+            repo_path = Path(curdir.joinpath(vcs['repo_dir']))
+            repo_exists = repo_path.is_dir()
+
+            if vcs['name'] == "git":
+                repo_exists = repo_exists or repo_path.is_file()
+
+            if repo_exists and shutil.which(vcs['cmd']):
                 vcs['wc_dir'] = str(curdir)
                 return vcs
     return None
